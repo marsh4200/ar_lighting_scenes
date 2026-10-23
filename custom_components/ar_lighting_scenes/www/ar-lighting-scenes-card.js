@@ -75,6 +75,21 @@ input.t{width:100%;height:44px;border-radius:8px;border:1px solid rgba(127,127,1
 .tools button.b{flex:1;padding:10px;font-size:13px}
 .clip{display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px 10px 8px 12px;border-radius:10px;background:rgba(242,184,102,.1);border:1px dashed rgba(242,184,102,.45);font-size:13px;color:var(--primary-text-color,#e1e1e1)}
 .clip span{flex:1;min-width:0}
+.foot.top{margin-top:10px}
+.lt.in{grid-template-columns:minmax(0,1fr) auto auto}
+.lt .ln b{display:block;font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lt .ln small,.pk small{display:block;font-size:11px;color:var(--secondary-text-color,#9b9b9b)}
+.lt .x{font:400 20px/1 Roboto,system-ui,sans-serif;width:30px;height:30px;border-radius:8px;border:0;background:transparent;color:var(--secondary-text-color,#9b9b9b);cursor:pointer}
+.lt .x:hover{background:rgba(127,127,127,.13);color:#ff8a7a}
+.lt.in .dim{grid-column:1 / 4}
+input.search{height:40px;font-size:14px;margin-top:8px}
+.pick{margin-top:8px;max-height:320px;overflow-y:auto;border-radius:10px;border:1px solid rgba(127,127,127,.22);padding:4px}
+.pk{display:flex;align-items:center;gap:12px;padding:9px 10px;border-radius:8px;cursor:pointer}
+.pk:hover{background:rgba(127,127,127,.11)}
+.pk.on{background:rgba(242,184,102,.1)}
+.pk input{width:18px;height:18px;accent-color:#f2b866;margin:0;flex:none}
+.pk .ln{min-width:0}
+.pk b{display:block;font-weight:400;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .toast{position:sticky;bottom:0;margin:10px 0 0;padding:10px 12px;border-radius:10px;background:rgba(76,175,80,.16);border:1px solid rgba(76,175,80,.4);font-size:13px;color:var(--primary-text-color,#e1e1e1);display:none}
 .toast.show{display:block}
 .toast.bad{background:rgba(244,67,54,.14);border-color:rgba(244,67,54,.45);color:var(--primary-text-color,#e1e1e1)}
@@ -327,107 +342,120 @@ class ARLightingScenesCard extends HTMLElement {
   renderEdit() {
     const d = this.draft;
     const lights = this.b.lights();
-    const areas = [];
-    lights.forEach((l) => areas.indexOf(l.area) < 0 && areas.push(l.area));
-    if (!this.area || areas.indexOf(this.area) < 0) {
-      const firstUsed = lights.find((l) => d.lights[l.entity]);
-      this.area = firstUsed ? firstUsed.area : areas[0];
-    }
-    const used = (a) => lights.filter((l) => l.area === a && d.lights[l.entity]).length;
+    const byId = {};
+    lights.forEach((l) => (byId[l.entity] = l));
+    const kindOf = (l) => (l.entity.split(".")[0] === "switch" ? "switch" : "light");
+    if (this.kind !== "switch") this.kind = "light";
+    if (typeof this.q !== "string") this.q = "";
+    const sub = (l) => (kindOf(l) === "switch" ? "Switch" : "Light") + (l.area && l.area !== "Other" ? " · " + l.area : "");
     let h = `<div class="lbl">${d.id ? "Edit scene" : "New scene"}</div><input class="t" id="name" placeholder="Scene name, e.g. Movie night" maxlength="24" value="${esc(d.name)}">`;
-    h += `<div class="lbl">Lights<span>${Object.keys(d.lights).length} in this scene</span></div><div class="tabs">`;
-    areas.forEach((a) => (h += `<button class="tab${a === this.area ? " sel" : ""}" data-a="${esc(a)}">${esc(a)}${used(a) ? "<i>" + used(a) + "</i>" : ""}</button>`));
-    h += `</div><div class="sheet">`;
-    lights
-      .filter((l) => l.area === this.area)
-      .forEach((l) => {
-        const s = d.lights[l.entity];
-        h += `<div class="lt${s ? "" : " out"}"><input type="checkbox" data-in="${l.entity}" ${s ? "checked" : ""} aria-label="Use ${esc(l.name)}"><span class="ln">${esc(l.name)}</span>`;
-        if (s) {
-          h += `<span class="sw"><button data-on="${l.entity}" class="${s.on ? "sel" : ""}">On</button><button data-off="${l.entity}" class="${s.on ? "" : "sel"}">Off</button></span>`;
-          if (s.on && l.dim) h += `<div class="dim"><input type="range" min="1" max="100" value="${Math.round((s.bri || 1) * 100)}" data-bri="${l.entity}" aria-label="${esc(l.name)} brightness"><span>${Math.round((s.bri || 1) * 100)} %</span></div>`;
-        } else h += `<span></span>`;
-        h += `</div>`;
-      });
-    const inRoom = lights.filter((l) => l.area === this.area && d.lights[l.entity]).length;
-    h += `</div><button class="b wide" id="copy">Use how the ${esc(this.area)} lights are right now</button>`;
-    h += `<div class="tools"><button class="b" id="croom" ${inRoom ? "" : "disabled"}>Copy ${esc(this.area)} settings</button>`;
+    h += `<div class="foot top">${d.id ? '<button class="b d" id="del">Delete</button>' : ""}<span class="sp"></span><button class="b" id="cancel">Cancel</button><button class="b" id="try">Try it</button><button class="b p" id="save">Save</button></div><div class="err" id="err"></div>`;
+    h += `<div class="lbl">In this scene<span id="cnt"></span></div><div id="chosen"></div>`;
+    h += `<div class="lbl">Add to the scene</div><div class="tabs"><button class="tab" data-k="light">Lights <i>${lights.filter((l) => kindOf(l) === "light").length}</i></button><button class="tab" data-k="switch">Switches <i>${lights.filter((l) => kindOf(l) === "switch").length}</i></button></div>`;
+    h += `<input class="t search" id="q" type="search" placeholder="Search" autocomplete="off" value="${esc(this.q)}"><div class="pick" id="pick"></div>`;
     const c = this.clip;
-    if (c && c.kind === "room") h += `<button class="b p" id="paste" ${c.area === this.area ? "disabled" : ""}>Paste ${esc(c.area)} into ${esc(this.area)}</button>`;
-    if (c && c.kind === "scene") h += `<button class="b p" id="paste">Paste ${esc(c.name)}</button>`;
-    h += `</div>`;
-    if (c) h += `<div class="clip"><span>Copied: ${c.kind === "room" ? esc(c.area) + " (" + c.items.length + " lights)" : esc(c.name) + " (" + Object.keys(c.lights).length + " lights)"}</span><button class="b" id="clear" style="padding:4px 10px">Clear</button></div>`;
-    h += `<div class="err" id="err"></div><div class="foot">${d.id ? '<button class="b d" id="del">Delete</button>' : ""}<span class="sp"></span><button class="b" id="cancel">Cancel</button><button class="b" id="try">Try it</button><button class="b p" id="save">Save</button></div>`;
+    if (c && c.kind === "scene") h += `<div class="clip"><span>Copied: ${esc(c.name)} (${Object.keys(c.lights).length})</span><button class="b p" id="paste" style="padding:4px 10px">Paste</button><button class="b" id="clear" style="padding:4px 10px">Clear</button></div>`;
     this.shell(h);
     const R = this.shadowRoot;
-    R.getElementById("name").addEventListener("input", (e) => (d.name = e.target.value));
-    this.on("[data-a]", "click", (e) => {
-      this.area = e.currentTarget.getAttribute("data-a");
-      this.renderEdit();
+    const chosen = R.getElementById("chosen");
+    const pick = R.getElementById("pick");
+
+    // what's in the scene: on / off, brightness, remove
+    const drawChosen = () => {
+      const ids = Object.keys(d.lights).filter((e) => byId[e]);
+      R.getElementById("cnt").textContent = ids.length ? ids.length + (ids.length === 1 ? " item" : " items") : "";
+      if (!ids.length) {
+        chosen.innerHTML = `<div class="empty">Nothing yet. Tick lights or switches below.</div>`;
+        return;
+      }
+      ids.sort((a, b) => byId[a].name.localeCompare(byId[b].name));
+      let x = "";
+      ids.forEach((e) => {
+        const l = byId[e];
+        const s = d.lights[e];
+        x += `<div class="lt in"><span class="ln"><b>${esc(l.name)}</b><small>${esc(sub(l))}</small></span><span class="sw"><button data-on="${e}" class="${s.on ? "sel" : ""}">On</button><button data-off="${e}" class="${s.on ? "" : "sel"}">Off</button></span><button class="x" data-rm="${e}" aria-label="Take ${esc(l.name)} out">×</button>`;
+        if (s.on && l.dim) x += `<div class="dim"><input type="range" min="1" max="100" value="${Math.round((s.bri || 1) * 100)}" data-bri="${e}" aria-label="${esc(l.name)} brightness"><span>${Math.round((s.bri || 1) * 100)} %</span></div>`;
+        x += `</div>`;
+      });
+      x += `<button class="b wide" id="now">Use how these are right now</button>`;
+      chosen.innerHTML = x;
+    };
+    // the list to add from: one tab for lights, one for switches, with search
+    const drawPick = () => {
+      R.querySelectorAll("[data-k]").forEach((t) => t.classList.toggle("sel", t.getAttribute("data-k") === this.kind));
+      const q = this.q.trim().toLowerCase();
+      const list = lights.filter((l) => kindOf(l) === this.kind && (!q || (l.name + " " + (l.area || "") + " " + l.entity).toLowerCase().indexOf(q) >= 0));
+      if (!list.length) {
+        pick.innerHTML = `<div class="empty">${q ? "Nothing matches “" + esc(this.q) + "”" : "None in Home Assistant"}</div>`;
+        return;
+      }
+      let x = "";
+      list.forEach((l) => {
+        const inn = !!d.lights[l.entity];
+        x += `<label class="pk${inn ? " on" : ""}"><input type="checkbox" data-in="${l.entity}" ${inn ? "checked" : ""}><span class="ln"><b>${esc(l.name)}</b>${l.area && l.area !== "Other" ? "<small>" + esc(l.area) + "</small>" : ""}</span></label>`;
+      });
+      pick.innerHTML = x;
+    };
+    drawChosen();
+    drawPick();
+
+    R.getElementById("name").addEventListener("input", (e) => {
+      d.name = e.target.value;
+      R.getElementById("err").textContent = "";
     });
-    this.on("[data-in]", "change", (e) => {
-      const id = e.currentTarget.getAttribute("data-in");
-      const l = lights.find((x) => x.entity === id);
-      if (e.currentTarget.checked) d.lights[id] = { on: true, bri: l.dim ? l.bri || 0.8 : 1 };
+    this.on("[data-k]", "click", (e) => {
+      this.kind = e.currentTarget.getAttribute("data-k");
+      pick.scrollTop = 0;
+      drawPick();
+    });
+    R.getElementById("q").addEventListener("input", (e) => {
+      this.q = e.target.value;
+      drawPick();
+    });
+    pick.addEventListener("change", (e) => {
+      const id = e.target.getAttribute && e.target.getAttribute("data-in");
+      if (!id) return;
+      const l = byId[id];
+      if (e.target.checked) d.lights[id] = { on: true, bri: l.dim ? 0.8 : 1 };
       else delete d.lights[id];
-      this.renderEdit();
+      e.target.parentNode.classList.toggle("on", e.target.checked);
+      drawChosen();
     });
-    this.on("[data-on]", "click", (e) => {
-      d.lights[e.currentTarget.getAttribute("data-on")].on = true;
-      this.renderEdit();
+    chosen.addEventListener("click", (e) => {
+      const t = e.target;
+      const on = t.getAttribute("data-on");
+      const off = t.getAttribute("data-off");
+      const rm = t.getAttribute("data-rm");
+      if (on) d.lights[on].on = true;
+      else if (off) d.lights[off].on = false;
+      else if (rm) {
+        delete d.lights[rm];
+        drawPick();
+      } else if (t.id === "now") {
+        Object.keys(d.lights).forEach((id) => {
+          const l = byId[id];
+          if (l) d.lights[id] = { on: l.on, bri: l.dim && l.on ? l.bri || 1 : 1 };
+        });
+        this.toast("Filled in from how they are right now.");
+      } else return;
+      drawChosen();
     });
-    this.on("[data-off]", "click", (e) => {
-      d.lights[e.currentTarget.getAttribute("data-off")].on = false;
-      this.renderEdit();
-    });
-    this.on("[data-bri]", "input", (e) => {
-      const v = Number(e.currentTarget.value);
-      d.lights[e.currentTarget.getAttribute("data-bri")].bri = v / 100;
-      e.currentTarget.nextElementSibling.textContent = v + " %";
-    });
-    R.getElementById("copy").addEventListener("click", () => {
-      lights
-        .filter((l) => l.area === this.area)
-        .forEach((l) => (d.lights[l.entity] = { on: l.on, bri: l.dim && l.on ? l.bri || 1 : 1 }));
-      this.renderEdit();
-    });
-    // copy this room's settings in the scene; paste them onto another room's
-    // lights (same name first, e.g. Downlights -> Downlights, then in order)
-    R.getElementById("croom").addEventListener("click", () => {
-      const items = lights.filter((l) => l.area === this.area && d.lights[l.entity]).map((l) => ({ name: l.name.toLowerCase(), on: d.lights[l.entity].on, bri: d.lights[l.entity].bri }));
-      this.clip = { kind: "room", area: this.area, items: items };
-      this.renderEdit();
-      this.toast(this.area + " copied. Tap another room above, then Paste.");
+    chosen.addEventListener("input", (e) => {
+      const id = e.target.getAttribute("data-bri");
+      if (!id) return;
+      const v = Number(e.target.value);
+      d.lights[id].bri = v / 100;
+      e.target.nextElementSibling.textContent = v + " %";
     });
     const pb = R.getElementById("paste");
     if (pb)
       pb.addEventListener("click", () => {
-        const c = this.clip;
-        if (c.kind === "scene") {
-          Object.keys(c.lights).forEach((e) => (d.lights[e] = Object.assign({}, c.lights[e])));
-          if (!d.name.trim()) d.name = c.name + " copy";
-          this.renderEdit();
-          this.toast(c.name + " pasted: " + Object.keys(c.lights).length + " lights. Change anything you like, then Save.");
-          return;
-        }
-        const target = lights.filter((l) => l.area === this.area);
-        const left = c.items.slice();
-        const take = (fn) => {
-          const i = left.findIndex(fn);
-          return i < 0 ? null : left.splice(i, 1)[0];
-        };
-        const pairs = target.map((l) => ({ l: l, s: take((x) => x.name === l.name.toLowerCase()) }));
-        pairs.forEach((p) => {
-          if (!p.s) p.s = take(() => true);
-        });
-        let n = 0;
-        pairs.forEach((p) => {
-          if (!p.s) return;
-          d.lights[p.l.entity] = { on: p.s.on, bri: p.l.dim ? p.s.bri || 1 : 1 };
-          n++;
-        });
-        this.renderEdit();
-        this.toast(c.area + " pasted into " + this.area + ": " + n + " lights set." + (target.length > n ? " " + (target.length - n) + " left as they were." : ""));
+        Object.keys(c.lights).forEach((e) => (d.lights[e] = Object.assign({}, c.lights[e])));
+        if (!d.name.trim()) d.name = c.name + " copy";
+        R.getElementById("name").value = d.name;
+        drawChosen();
+        drawPick();
+        this.toast(c.name + " pasted. Change anything you like, then Save.");
       });
     const cl = R.getElementById("clear");
     if (cl)
@@ -436,11 +464,12 @@ class ARLightingScenesCard extends HTMLElement {
         this.renderEdit();
       });
     R.getElementById("cancel").addEventListener("click", () => {
+      this.q = "";
       this.view = "list";
       this.render();
     });
     R.getElementById("try").addEventListener("click", () => {
-      if (!Object.keys(d.lights).length) return void (R.getElementById("err").textContent = "Tick at least one light.");
+      if (!Object.keys(d.lights).length) return void (R.getElementById("err").textContent = "Tick at least one light or switch.");
       this.b.activate(null, d);
       this.toast("Showing it on the lights now. Save to keep it.");
     });
@@ -459,8 +488,13 @@ class ARLightingScenesCard extends HTMLElement {
     R.getElementById("save").addEventListener("click", () => {
       const err = R.getElementById("err");
       d.name = d.name.trim();
-      if (!d.name) return void (err.textContent = "Give the scene a name.");
-      if (!Object.keys(d.lights).length) return void (err.textContent = "Tick at least one light.");
+      if (!d.name) {
+        err.textContent = "Give the scene a name.";
+        R.getElementById("name").focus();
+        return;
+      }
+      if (!Object.keys(d.lights).length) return void (err.textContent = "Tick at least one light or switch.");
+      this.q = "";
       const was = d.id;
       if (!d.id) d.id = d.name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "").slice(0, 30) + "_" + Math.random().toString(36).slice(2, 6);
       const id = this.b.save(d);

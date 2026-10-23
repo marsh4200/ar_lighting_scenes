@@ -9,7 +9,7 @@ import voluptuous as vol
 from homeassistant.config_entries import ConfigEntry, ConfigFlow, ConfigFlowResult, OptionsFlow
 from homeassistant.core import HomeAssistant, callback
 
-from .const import CONF_SIDEBAR, CONF_SWITCHES, DOMAIN, NAME, NSP_DOMAIN
+from .const import CONF_SIDEBAR, DOMAIN, NAME, NSP_DOMAIN
 
 
 async def _find_panels(hass: HomeAssistant) -> list[dict[str, Any]] | None:
@@ -29,7 +29,6 @@ def _schema(defaults: dict[str, Any]) -> vol.Schema:
     return vol.Schema(
         {
             vol.Optional(CONF_SIDEBAR, default=defaults.get(CONF_SIDEBAR, True)): bool,
-            vol.Optional(CONF_SWITCHES, default=defaults.get(CONF_SWITCHES, False)): bool,
         }
     )
 

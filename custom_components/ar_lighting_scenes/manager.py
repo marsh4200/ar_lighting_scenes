@@ -32,7 +32,6 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from homeassistant.helpers.storage import Store
 
 from .const import (
-    CONF_SWITCHES,
     DOMAIN,
     MAX_NAME,
     MAX_PER_PANEL,
@@ -177,8 +176,10 @@ class ScenesManager:
     # --- what the card shows ---------------------------------------------------------
 
     def lights(self) -> list[dict[str, Any]]:
-        """Lights (and switches, if chosen) by HA area, for the scene editor."""
-        domains = ["light"] + (["switch"] if self.entry.options.get(CONF_SWITCHES) else [])
+        """Every light and switch for the scene editor (nothing else: no sensors,
+        no hidden ones, no device settings switches). The room, when set in Home
+        Assistant, only shows as a hint."""
+        domains = ["light", "switch"]
         ereg = er.async_get(self.hass)
         dreg = dr.async_get(self.hass)
         areg = ar.async_get(self.hass)
@@ -196,11 +197,10 @@ class ScenesManager:
             area = areg.async_get_area(area_id) if area_id else None
             area_name = area.name if area else "Other"
             name = str(st.attributes.get("friendly_name") or st.entity_id)
-            short = name[len(area_name) + 1 :] if name.lower().startswith(area_name.lower() + " ") else name
             modes = st.attributes.get("supported_color_modes") or []
             dim = st.domain == "light" and any(m != "onoff" for m in modes)
-            out.append({"entity": st.entity_id, "name": short or name, "area": area_name, "dim": dim})
-        out.sort(key=lambda x: (x["area"] == "Other", x["area"].lower(), x["name"].lower()))
+            out.append({"entity": st.entity_id, "name": name, "area": area_name, "dim": dim})
+        out.sort(key=lambda x: x["name"].lower())
         return out
 
     def state(self) -> dict[str, Any]:

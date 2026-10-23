@@ -5,8 +5,7 @@
         "title": "AR Lighting Scenes",
         "description": "Found {count} AR NSPanel Pro panel(s): {panels}.\n\nCustomers make lighting scenes on the Lighting Scenes card and push them to these panels. New panels are picked up by themselves.",
         "data": {
-          "sidebar": "Add a Lighting Scenes page to the sidebar",
-          "include_switches": "Let scenes use switches too (not only lights)"
+          "sidebar": "Add a Lighting Scenes page to the sidebar"
         }
       }
     },
@@ -21,8 +20,7 @@
       "init": {
         "title": "AR Lighting Scenes",
         "data": {
-          "sidebar": "Add a Lighting Scenes page to the sidebar",
-          "include_switches": "Let scenes use switches too (not only lights)"
+          "sidebar": "Add a Lighting Scenes page to the sidebar"
         }
       }
     }

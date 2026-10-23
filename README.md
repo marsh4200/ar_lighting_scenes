@@ -29,12 +29,11 @@ installer's tool. This integration is for customers.
 In the card:
 
 - **Pick a panel** or **All panels**.
-- **+ New lighting scene**: give it a name, go through the rooms, and tick lights.
-  For each light, set on or off and a brightness. "Use how the lights are right
-  now" fills in a room from its current state. **Try it** shows the scene on the
-  lights without saving it.
-- **Copy room / Paste**: copy one room's settings onto another room. Lights with
-  the same name get the same setting.
+- **+ New lighting scene**: the name and Save sit at the top. Pick from the
+  **Lights** or **Switches** tab (with search; the list scrolls in its own box).
+  What you tick shows under "In this scene", where you set on or off and a
+  brightness, or take it out again. "Use how these are right now" fills them in
+  from their current state. **Try it** shows the scene without saving it.
 - **Copy** a scene, then **Paste** it into a new scene on another panel.
 - **Save**, then **Push to panel**: push to one panel, several, or all of them.
 - **Copy a panel's scenes to other panels**: the panels you pick end up identical.
@@ -47,7 +46,9 @@ it in automations, scripts and voice.
 ## Options
 
 - Lighting Scenes page in the sidebar (on by default).
-- Let scenes use switches too, not only lights (off by default).
+
+Only lights and switches are offered: no sensors, no hidden entities and no
+device settings switches.
 
 ## How it talks to AR NSPanel Pro
 

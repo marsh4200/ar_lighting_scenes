@@ -4,7 +4,7 @@ from __future__ import annotations
 
 DOMAIN = "ar_lighting_scenes"
 NAME = "AR Lighting Scenes"
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 #: The panel integration this one feeds. Talked to only through its services
 #: (list_panels / set_scenes) and its panel-status bus event.
@@ -19,7 +19,6 @@ MAX_NAME = 24
 STORE_KEY = f"{DOMAIN}.data"
 STORE_VERSION = 1
 
-CONF_SWITCHES = "include_switches"
 CONF_SIDEBAR = "sidebar"
 
 #: dispatcher: scenes / panels changed (card subscriptions, scene entities)
