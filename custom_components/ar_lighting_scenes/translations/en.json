@@ -1,0 +1,30 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "AR Lighting Scenes",
+        "description": "Found {count} AR NSPanel Pro panel(s): {panels}.\n\nCustomers make lighting scenes on the Lighting Scenes card and push them to these panels. New panels are picked up by themselves.",
+        "data": {
+          "sidebar": "Add a Lighting Scenes page to the sidebar",
+          "include_switches": "Let scenes use switches too (not only lights)"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "AR Lighting Scenes is already set up.",
+      "no_nspanel": "AR NSPanel Pro isn't set up. Install it and add your panels first, then add AR Lighting Scenes.",
+      "nspanel_too_old": "AR NSPanel Pro needs updating to 1.9.9 or newer for lighting scenes."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "AR Lighting Scenes",
+        "data": {
+          "sidebar": "Add a Lighting Scenes page to the sidebar",
+          "include_switches": "Let scenes use switches too (not only lights)"
+        }
+      }
+    }
+  }
+}

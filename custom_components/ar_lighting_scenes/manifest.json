@@ -1,0 +1,15 @@
+{
+  "domain": "ar_lighting_scenes",
+  "name": "AR Lighting Scenes",
+  "after_dependencies": ["ar_nspanel_pro"],
+  "codeowners": ["@marsh4200"],
+  "config_flow": true,
+  "dependencies": ["http", "frontend", "websocket_api", "scene"],
+  "documentation": "https://github.com/marsh4200/ar_lighting_scenes",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/marsh4200/ar_lighting_scenes/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "1.0.0"
+}
