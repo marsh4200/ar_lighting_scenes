@@ -95,7 +95,36 @@ input.search{height:40px;font-size:14px;margin-top:8px}
 .toast.bad{background:rgba(244,67,54,.14);border-color:rgba(244,67,54,.45);color:var(--primary-text-color,#e1e1e1)}
 .warn{font-size:13px;color:var(--warning-color,#e09b2d);margin:8px 0 0;line-height:1.45}
 .loading{padding:28px 0;text-align:center;color:var(--secondary-text-color,#9b9b9b);font-size:14px}
+.sec{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px}
+.sec .tab{font-size:14px;padding:8px 14px}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;margin-top:10px}
+.mg.bg{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.mi{position:relative;border-radius:12px;border:1px solid rgba(127,127,127,.26);background:rgba(127,127,127,.07);overflow:hidden}
+.mi .th{aspect-ratio:1;display:grid;place-items:center;background:#15151a}
+.mi .th img{width:72%;height:72%;object-fit:cover;border-radius:50%}
+.mg.bg .mi .th{aspect-ratio:16/10}
+.mg.bg .mi .th img{width:100%;height:100%;border-radius:0}
+.mi .mn{font-size:12px;padding:6px 8px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mi .x{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:16px;line-height:28px;cursor:pointer;padding:0}
+.mi .x:hover{background:#b3473a}
+.madd{border:1px dashed rgba(127,127,127,.45);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:120px;cursor:pointer;color:var(--secondary-text-color,#9b9b9b);font:13px Roboto,system-ui,sans-serif;background:transparent}
+.madd b{font-size:26px;font-weight:300;color:#f2b866}
+.madd:disabled{opacity:.45;cursor:default}
+.mfull{margin-top:10px;font-size:13px;color:#ff8a7a}
+.crop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}
+.cbox{width:min(640px,100%);background:var(--ha-card-background,var(--card-background-color,#1c1c1c));border-radius:14px;border:1px solid rgba(127,127,127,.25);padding:16px;display:flex;flex-direction:column;gap:12px;max-height:100%;overflow:auto}
+.cbox h2{font-size:17px;font-weight:500;margin:0}
+.cfw{display:flex;justify-content:center;background:#0b0b0d;border-radius:10px;padding:14px}
+.cfr{position:relative;overflow:hidden;touch-action:none;cursor:grab;background:#000;border-radius:6px;box-shadow:0 0 0 2px #f2b866}
+.cfr.round{border-radius:50%}
+.cfr img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none;pointer-events:none;max-width:none}
+.czm{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--secondary-text-color,#9b9b9b)}
+.czm input{flex:1;accent-color:#f2b866}
+.cact{display:flex;gap:8px;justify-content:flex-end}
 `;
+
+// uploaded icons / backgrounds: the shapes a background can be cropped to
+const SHAPES = { wide: [16, 10, "Landscape · Source 10 (16:10)"], hd: [16, 9, "Wide · Source 7 (16:9)"], sq: [1, 1, "Square · NSPanel Pro"], tall: [10, 16, "Portrait"] };
 
 const BULB = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>';
 
@@ -112,6 +141,13 @@ class ARLightingScenesCard extends HTMLElement {
     this.pushId = null;
     this.toastT = null;
     this.clip = null; // {kind:"room", area, items:[{name,on,bri}]} | {kind:"scene", name, lights}
+    this.section = "scenes"; // scenes | icons | backgrounds (the tabs at the top)
+    this.shadowRoot.addEventListener("click", (e) => {
+      const t = e.target.closest && e.target.closest("[data-sec]");
+      if (!t) return;
+      this.section = t.getAttribute("data-sec");
+      this.render();
+    });
   }
   set backend(b) {
     this.b = b;
@@ -145,7 +181,8 @@ class ARLightingScenesCard extends HTMLElement {
     this.toastT = setTimeout(() => t.classList.remove("show"), 3500);
   }
   shell(body) {
-    this.shadowRoot.innerHTML = `<style>${CSS}</style><div class="card"><div class="hd"><span class="ic">${BULB}</span><div><h1>Lighting Scenes</h1><p>Make your own scenes and put them on your panels</p></div></div><div class="bd">${body}<div class="toast" role="status"></div></div></div>`;
+    const tabs = this.view === "list" && this.b ? `<div class="sec">${[["scenes", "Lighting scenes"], ["icons", "Icons"], ["backgrounds", "Backgrounds"]].map((t) => `<button class="tab${this.section === t[0] ? " sel" : ""}" data-sec="${t[0]}" type="button">${t[1]}</button>`).join("")}</div>` : "";
+    this.shadowRoot.innerHTML = `<style>${CSS}</style><div class="card"><div class="hd"><span class="ic">${BULB}</span><div><h1>Lighting Scenes</h1><p>Make your own scenes, icons and backgrounds for your panels</p></div></div><div class="bd">${tabs}${body}<div class="toast" role="status"></div></div></div>`;
     return this.shadowRoot;
   }
   on(sel, ev, fn) {
@@ -158,6 +195,7 @@ class ARLightingScenesCard extends HTMLElement {
   }
 
   render() {
+    if (this.view === "list" && this.section !== "scenes") return this.renderMedia();
     if (this.view === "edit") return this.renderEdit();
     if (this.view === "push") return this.renderPush();
     if (this.view === "copy") return this.renderCopy();
@@ -557,6 +595,188 @@ class ARLightingScenesCard extends HTMLElement {
       this.toast(sc.name + " pushed to " + panels.filter((p) => ids.indexOf(p.id) >= 0).map((p) => p.name).join(", "));
     });
   }
+
+  // ---- uploaded icons / backgrounds (every panel can pick them) ----
+  renderMedia() {
+    const kind = this.section; // icons | backgrounds
+    const isIcon = kind === "icons";
+    const m = this.b.media ? this.b.media() : { max: 10, icons: [], backgrounds: [] };
+    const list = m[kind] || [];
+    const max = m.max || 10;
+    const full = list.length >= max;
+    let h = `<div class="lbl">${isIcon ? "Your icons" : "Your backgrounds"}<span>${list.length} of ${max}</span></div>`;
+    h += `<p class="note" style="margin:0">${isIcon ? "On every panel under Settings → Icons, to put on a home-screen button." : "On every panel under Settings → Look → Backgrounds, for every room or one room."}</p>`;
+    h += `<div class="mg${isIcon ? "" : " bg"}">`;
+    list.forEach((it) => {
+      h += `<div class="mi"><div class="th"><img alt="" src="${esc(it.url)}"></div><div class="mn">${esc(it.name)}</div><button class="x" type="button" data-del="${esc(it.id)}" aria-label="Delete ${esc(it.name)}">×</button></div>`;
+    });
+    h += `<button class="madd" type="button" id="madd" ${full ? "disabled" : ""}><b>+</b>${isIcon ? "Upload icon" : "Upload background"}</button></div>`;
+    if (full) h += `<div class="mfull">${max} of ${max} used. Delete one to add another.</div>`;
+    h += `<input type="file" id="mfile" accept="image/*" hidden>`;
+    this.shell(h);
+    const R = this.shadowRoot;
+    this.on("[data-del]", "click", (e) => {
+      const id = e.currentTarget.getAttribute("data-del");
+      const it = list.find((x) => x.id === id);
+      this.b.delMedia(kind, id).then(() => {
+        this.render();
+        this.toast((it ? it.name : "Picture") + " deleted. Panels using it go back to their own.");
+      });
+    });
+    const add = R.getElementById("madd");
+    if (add)
+      add.addEventListener("click", () => {
+        const f = R.getElementById("mfile");
+        f.value = "";
+        f.click();
+      });
+    R.getElementById("mfile").addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const rd = new FileReader();
+      rd.onload = () => this.openCrop(kind, rd.result, file.name);
+      rd.readAsDataURL(file);
+    });
+  }
+  openCrop(kind, src, fileName) {
+    const isIcon = kind === "icons";
+    const cr = { shape: isIcon ? "sq" : "wide", s: 1, min: 1, x: 0, y: 0, fw: 0, fh: 0 };
+    const wrap = document.createElement("div");
+    wrap.className = "crop";
+    wrap.innerHTML = `<div class="cbox" role="dialog" aria-modal="true"><h2>${isIcon ? "Crop your icon" : "Crop your background"}</h2><div class="tabs" id="cshp"></div><div class="cfw"><div class="cfr${isIcon ? " round" : ""}" id="cfr"><img alt="" id="cimg"></div></div><div class="czm"><span>Zoom</span><input type="range" id="czm" min="1" max="4" step="0.01" value="1" aria-label="Zoom"></div><input class="t" id="cnm" maxlength="24" placeholder="Name (shows under it on the panel)"><div class="cact"><button class="b" type="button" id="cno">Cancel</button><button class="b p" type="button" id="cok">Save</button></div></div>`;
+    this.shadowRoot.appendChild(wrap);
+    const $ = (id) => wrap.querySelector("#" + id);
+    const img = $("cimg");
+    const frame = $("cfr");
+    $("cnm").value = String(fileName || "").replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").slice(0, 24);
+    const size = () => {
+      const [a, b] = SHAPES[cr.shape];
+      const maxW = Math.min(560, wrap.clientWidth - 80);
+      const maxH = Math.min(380, window.innerHeight * 0.45);
+      let w = maxW;
+      let h = (w * b) / a;
+      if (h > maxH) {
+        h = maxH;
+        w = (h * a) / b;
+      }
+      cr.fw = Math.round(w);
+      cr.fh = Math.round(h);
+      frame.style.width = cr.fw + "px";
+      frame.style.height = cr.fh + "px";
+    };
+    const draw = () => {
+      const iw = img.naturalWidth * cr.s;
+      const ih = img.naturalHeight * cr.s;
+      cr.x = Math.min(0, Math.max(cr.fw - iw, cr.x));
+      cr.y = Math.min(0, Math.max(cr.fh - ih, cr.y));
+      img.style.transform = "translate(" + cr.x + "px," + cr.y + "px) scale(" + cr.s + ")";
+    };
+    const fit = () => {
+      size();
+      cr.min = Math.max(cr.fw / img.naturalWidth, cr.fh / img.naturalHeight);
+      cr.s = cr.min;
+      cr.x = (cr.fw - img.naturalWidth * cr.s) / 2;
+      cr.y = (cr.fh - img.naturalHeight * cr.s) / 2;
+      $("czm").value = 1;
+      draw();
+    };
+    const zoomTo = (z, cx, cy) => {
+      const ns = cr.min * z;
+      cx = cx == null ? cr.fw / 2 : cx;
+      cy = cy == null ? cr.fh / 2 : cy;
+      cr.x = cx - ((cx - cr.x) * ns) / cr.s;
+      cr.y = cy - ((cy - cr.y) * ns) / cr.s;
+      cr.s = ns;
+      draw();
+    };
+    const shapes = () => {
+      const box = $("cshp");
+      if (isIcon) {
+        box.innerHTML = '<span class="note" style="margin:0">Square, shown round on the panel buttons.</span>';
+        return;
+      }
+      box.innerHTML = Object.keys(SHAPES).map((k) => `<button class="tab${k === cr.shape ? " sel" : ""}" type="button" data-shp="${k}">${SHAPES[k][2]}</button>`).join("");
+      box.querySelectorAll("[data-shp]").forEach((b) =>
+        b.addEventListener("click", () => {
+          cr.shape = b.getAttribute("data-shp");
+          shapes();
+          fit();
+        })
+      );
+    };
+    $("czm").addEventListener("input", (e) => zoomTo(+e.target.value));
+    const pts = new Map();
+    let pinch = null;
+    frame.addEventListener("pointerdown", (e) => {
+      frame.setPointerCapture(e.pointerId);
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 2) {
+        const [a, b] = [...pts.values()];
+        pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), z: cr.s / cr.min };
+      }
+    });
+    frame.addEventListener("pointermove", (e) => {
+      if (!pts.has(e.pointerId)) return;
+      const p = pts.get(e.pointerId);
+      if (pts.size === 1) {
+        cr.x += e.clientX - p.x;
+        cr.y += e.clientY - p.y;
+        draw();
+      }
+      pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (pts.size === 2 && pinch) {
+        const [a, b] = [...pts.values()];
+        const r = frame.getBoundingClientRect();
+        const z = Math.max(1, Math.min(4, (pinch.z * Math.hypot(a.x - b.x, a.y - b.y)) / pinch.d));
+        zoomTo(z, (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+        $("czm").value = z;
+      }
+    });
+    const up = (e) => {
+      pts.delete(e.pointerId);
+      if (pts.size < 2) pinch = null;
+    };
+    frame.addEventListener("pointerup", up);
+    frame.addEventListener("pointercancel", up);
+    frame.addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault();
+        const r = frame.getBoundingClientRect();
+        const z = Math.max(1, Math.min(4, (cr.s / cr.min) * (e.deltaY < 0 ? 1.08 : 1 / 1.08)));
+        zoomTo(z, e.clientX - r.left, e.clientY - r.top);
+        $("czm").value = z;
+      },
+      { passive: false }
+    );
+    const close = () => wrap.remove();
+    $("cno").addEventListener("click", close);
+    $("cok").addEventListener("click", () => {
+      const [a, b] = SHAPES[cr.shape];
+      const OW = isIcon ? 256 : a >= b ? 1600 : 1000;
+      const OH = Math.round((OW * b) / a);
+      const c = document.createElement("canvas");
+      c.width = OW;
+      c.height = OH;
+      const g = c.getContext("2d");
+      g.imageSmoothingQuality = "high";
+      g.drawImage(img, -cr.x / cr.s, -cr.y / cr.s, cr.fw / cr.s, cr.fh / cr.s, 0, 0, OW, OH);
+      const data = c.toDataURL(isIcon ? "image/png" : "image/jpeg", 0.86);
+      const name = $("cnm").value.trim();
+      $("cok").disabled = true;
+      $("cok").textContent = "Saving…";
+      this.b.addMedia(kind, name, data).then((ok) => {
+        close();
+        this.render();
+        if (ok) this.toast((name || (isIcon ? "Icon" : "Background")) + " saved. It's on every panel to pick now.");
+      });
+    });
+    img.onload = () => {
+      shapes();
+      fit();
+    };
+    img.src = src;
+  }
 }
 
 
@@ -579,6 +799,7 @@ class HaBackend {
   }
   async start() {
     await this.load(true);
+    await this.loadMedia().catch(() => {});
     this.unsub = await this.hass.connection.subscribeMessage(() => this.load().catch(() => {}), { type: "ar_lighting_scenes/subscribe" });
   }
   stop() {
@@ -590,6 +811,23 @@ class HaBackend {
       this.errs.forEach((f) => f((e && e.message) || "Home Assistant didn't accept that"));
       return this.load().catch(() => {});
     });
+  }
+  // uploaded icons / backgrounds (their own commands; the scenes are not involved)
+  async loadMedia() {
+    this.m = await this.ws("media");
+  }
+  media() {
+    return this.m || { max: 10, icons: [], backgrounds: [] };
+  }
+  addMedia(kind, name, data) {
+    return this.ws("media_add", { kind: kind, name: name, data: data })
+      .then((m) => ((this.m = m), true))
+      .catch((e) => (this.errs.forEach((f) => f((e && e.message) || "Home Assistant didn't accept that picture")), false));
+  }
+  delMedia(kind, id) {
+    return this.ws("media_delete", { kind: kind, item_id: id })
+      .then((m) => (this.m = m))
+      .catch((e) => this.errs.forEach((f) => f((e && e.message) || "Couldn't delete that picture")));
   }
   // what the card reads
   panels() {

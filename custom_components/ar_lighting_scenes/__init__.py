@@ -26,6 +26,7 @@ from homeassistant.helpers.typing import ConfigType
 from . import websocket_api
 from .const import CARD_FILE, CONF_SIDEBAR, DOMAIN, SIDEBAR_PATH, STATIC_URL, VERSION
 from .manager import ScenesManager
+from .media import MediaLibrary
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,12 +50,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ScenesConfigEntry) -> bo
     mgr = ScenesManager(hass, entry)
     await mgr.async_load()
     entry.runtime_data = mgr
+    # uploaded icons / backgrounds: separate from the scenes (own storage and folder)
+    media = MediaLibrary(hass)
+    await media.async_load()
+    hass.data[f"{DOMAIN}_media"] = media
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # find the panels once AR NSPanel Pro has set them up (after start-up, or
     # straight away when this is added to a running Home Assistant)
     if hass.state is CoreState.running:
         entry.async_create_background_task(hass, mgr.async_start(), f"{DOMAIN}_start")
+        entry.async_create_background_task(hass, media.async_start(), f"{DOMAIN}_media_start")
     else:
 
         pending: list = []
@@ -62,6 +68,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ScenesConfigEntry) -> bo
         async def _started(_event: Event) -> None:
             pending.clear()
             await mgr.async_start()
+            await media.async_start()
 
         pending.append(hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _started))
         entry.async_on_unload(lambda: [u() for u in pending])
@@ -97,6 +104,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ScenesConfigEntry) -> b
     ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if ok:
         await entry.runtime_data.async_stop()
+        media = hass.data.pop(f"{DOMAIN}_media", None)
+        if media is not None:
+            await media.async_stop()
         if hass.data.pop(f"{DOMAIN}_sidebar", False):
             async_remove_panel(hass, SIDEBAR_PATH)
     return ok

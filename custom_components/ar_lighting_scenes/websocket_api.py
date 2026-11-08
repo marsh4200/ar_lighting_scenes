@@ -128,7 +128,63 @@ def ws_subscribe(hass: HomeAssistant, connection: websocket_api.ActiveConnection
     connection.send_result(msg["id"])
 
 
+# --- uploaded icons and backgrounds (media.py) -----------------------------------------
+
+
+def _media(hass: HomeAssistant):
+    lib = hass.data.get(f"{DOMAIN}_media")
+    if lib is None:
+        raise HomeAssistantError("AR Lighting Scenes isn't set up")
+    return lib
+
+
+def _run_media(handler):
+    async def wrapped(hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]) -> None:
+        try:
+            result = await handler(_media(hass), msg)
+        except HomeAssistantError as err:
+            connection.send_error(msg["id"], "failed", str(err))
+            return
+        connection.send_result(msg["id"], result)
+
+    return wrapped
+
+
+@websocket_api.websocket_command({vol.Required("type"): f"{DOMAIN}/media"})
+@websocket_api.async_response
+@_run_media
+async def ws_media(lib, msg: dict[str, Any]) -> dict[str, Any]:
+    return lib.state()
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/media_add",
+        vol.Required("kind"): vol.In(["icons", "backgrounds"]),
+        vol.Optional("name", default=""): str,
+        vol.Required("data"): str,
+    }
+)
+@websocket_api.async_response
+@_run_media
+async def ws_media_add(lib, msg: dict[str, Any]) -> dict[str, Any]:
+    await lib.async_add(msg["kind"], msg["name"], msg["data"])
+    return lib.state()
+
+
+@websocket_api.websocket_command(
+    {vol.Required("type"): f"{DOMAIN}/media_delete", vol.Required("kind"): vol.In(["icons", "backgrounds"]), vol.Required("item_id"): str}
+)
+@websocket_api.async_response
+@_run_media
+async def ws_media_delete(lib, msg: dict[str, Any]) -> dict[str, Any]:
+    await lib.async_delete(msg["kind"], msg["item_id"])
+    return lib.state()
+
+
 @callback
 def async_register(hass: HomeAssistant) -> None:
+    for cmd in (ws_media, ws_media_add, ws_media_delete):
+        websocket_api.async_register_command(hass, cmd)
     for cmd in (ws_state, ws_refresh, ws_save, ws_delete, ws_push, ws_unpush, ws_set_panel, ws_activate, ws_subscribe):
         websocket_api.async_register_command(hass, cmd)

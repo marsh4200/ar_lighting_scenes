@@ -43,6 +43,19 @@ In the card:
 Every scene is also a normal Home Assistant scene (`scene.ar_…`), so you can use
 it in automations, scripts and voice.
 
+## Icons and backgrounds (1.1.0)
+
+Next to **Lighting scenes**, the page has **Icons** and **Backgrounds** tabs:
+
+- **Upload** a picture from your phone, then drag and pinch to crop it. Icons are square (shown round on
+  the panel buttons); backgrounds are cropped to your panel's shape (Landscape 16:10 for the Source 10,
+  Wide 16:9 for the Source 7, Square for the NSPanel Pro, or Portrait), so what you frame is exactly what
+  the panel shows.
+- Up to **10 icons and 10 backgrounds**. At 10, delete one before adding another.
+- Every panel gets them: uploaded icons in the panel's **Settings > Icons**, uploaded backgrounds in
+  **Settings > Look > Backgrounds**. An icon is only offered as an icon, a background only as a background.
+- Pictures are stored in `<config>/ar_lighting_scenes_media/`. Needs AR NSPanel Pro 4.8.6 or newer.
+
 ## Options
 
 - Lighting Scenes page in the sidebar (on by default).
@@ -51,6 +64,9 @@ Only lights and switches are offered: no sensors, no hidden entities and no
 device settings switches.
 
 ## How it talks to AR NSPanel Pro
+
+Uploaded icons and backgrounds go to every panel through AR NSPanel Pro's `set_media` service.
+
 
 It only uses AR NSPanel Pro's `ar_nspanel_pro.list_panels` and
 `ar_nspanel_pro.set_scenes` services, plus its `ar_nspanel_pro_panel_status`

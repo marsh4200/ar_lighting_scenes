@@ -4,7 +4,7 @@ from __future__ import annotations
 
 DOMAIN = "ar_lighting_scenes"
 NAME = "AR Lighting Scenes"
-VERSION = "1.0.1"
+VERSION = "1.1.0"
 
 #: The panel integration this one feeds. Talked to only through its services
 #: (list_panels / set_scenes) and its panel-status bus event.
@@ -27,3 +27,8 @@ SIGNAL_UPDATE = f"{DOMAIN}_update"
 STATIC_URL = "/ar_lighting_scenes_static"
 CARD_FILE = "ar-lighting-scenes-card.js"
 SIDEBAR_PATH = "lighting-scenes"
+
+#: uploaded icons / backgrounds (media.py): at most this many of each
+MAX_MEDIA = 10
+MEDIA_DIR = "ar_lighting_scenes_media"
+MEDIA_URL = "/ar_lighting_scenes_media"
