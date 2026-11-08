@@ -4,7 +4,7 @@ from __future__ import annotations
 
 DOMAIN = "ar_lighting_scenes"
 NAME = "AR Lighting Scenes"
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 
 #: The panel integration this one feeds. Talked to only through its services
 #: (list_panels / set_scenes) and its panel-status bus event.

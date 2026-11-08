@@ -43,6 +43,21 @@ In the card:
 Every scene is also a normal Home Assistant scene (`scene.ar_…`), so you can use
 it in automations, scripts and voice.
 
+## Icons: background removed (1.1.1)
+
+An uploaded icon is saved as the **icon only**, on a see-through background, so it sits on the panel button like the built-in icons.
+
+- **Remove background** is on by default. The background colour is read from the picture's edge, and only background joined to the edge comes off, so white inside the icon (a window, an eye) stays.
+- The edges are soft and the background colour is taken out of them, so there's no white halo on the dark panel.
+- **Strength**: lower it if bits of the icon go, raise it if background is left.
+- **Inside gaps too**: also clears enclosed background, such as the middle of a ring or the hole in a letter.
+- **Icon colour**: As it is, or White. A dark icon is hard to see on the panel, and the cropper says so.
+- The live preview shows the saved icon on a checkerboard (see-through) and on the panel's dark colour.
+- The icon is trimmed and centred in the square. A picture that is already see-through (a PNG logo) is kept as it is.
+- Icons uploaded before 1.1.1 keep their background: delete them and upload them again.
+
+Needs AR NSPanel Pro 4.8.8 or newer, which shows uploaded icons in the button like the built-in icons (before that they filled the button like a photo).
+
 ## Icons and backgrounds (1.1.0)
 
 Next to **Lighting scenes**, the page has **Icons** and **Backgrounds** tabs:

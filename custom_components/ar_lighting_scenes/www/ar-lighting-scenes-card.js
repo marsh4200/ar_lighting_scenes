@@ -101,9 +101,9 @@ input.search{height:40px;font-size:14px;margin-top:8px}
 .mg.bg{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
 .mi{position:relative;border-radius:12px;border:1px solid rgba(127,127,127,.26);background:rgba(127,127,127,.07);overflow:hidden}
 .mi .th{aspect-ratio:1;display:grid;place-items:center;background:#15151a}
-.mi .th img{width:72%;height:72%;object-fit:cover;border-radius:50%}
+.mi .th img{width:60%;height:60%;object-fit:contain}
 .mg.bg .mi .th{aspect-ratio:16/10}
-.mg.bg .mi .th img{width:100%;height:100%;border-radius:0}
+.mg.bg .mi .th img{width:100%;height:100%;border-radius:0;object-fit:cover}
 .mi .mn{font-size:12px;padding:6px 8px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mi .x{position:absolute;top:6px;right:6px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;font-size:16px;line-height:28px;cursor:pointer;padding:0}
 .mi .x:hover{background:#b3473a}
@@ -116,7 +116,20 @@ input.search{height:40px;font-size:14px;margin-top:8px}
 .cbox h2{font-size:17px;font-weight:500;margin:0}
 .cfw{display:flex;justify-content:center;background:#0b0b0d;border-radius:10px;padding:14px}
 .cfr{position:relative;overflow:hidden;touch-action:none;cursor:grab;background:#000;border-radius:6px;box-shadow:0 0 0 2px #f2b866}
-.cfr.round{border-radius:50%}
+.chk{background-color:#2a2a30;background-image:linear-gradient(45deg,#3a3a42 25%,transparent 25%,transparent 75%,#3a3a42 75%),linear-gradient(45deg,#3a3a42 25%,transparent 25%,transparent 75%,#3a3a42 75%);background-size:16px 16px;background-position:0 0,8px 8px}
+.cfw.ic{gap:14px;flex-wrap:wrap;align-items:center}
+.cpv{display:grid;grid-template-columns:96px 96px;gap:8px;align-content:center}
+.cpv small{grid-column:1/-1;text-align:center;font-size:11px;color:var(--secondary-text-color,#9b9b9b)}
+.cpv .pv{width:96px;height:96px;border-radius:12px;display:grid;place-items:center;overflow:hidden}
+.cpv .pv canvas{width:72px;height:72px}
+.cpv .pv.dk{background:radial-gradient(circle at 50% 40%,#2b2b33,#141418);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.copt{display:flex;flex-direction:column;gap:8px}
+.ctg{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.ctg input{width:18px;height:18px;accent-color:#f2b866}
+.ctg small{color:var(--secondary-text-color,#9b9b9b)}
+.ccol{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--secondary-text-color,#9b9b9b)}
+.ccol span{margin-right:4px}
+.copt input[type=range]:disabled,.ctg input:disabled{opacity:.4}
 .cfr img{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;-webkit-user-drag:none;pointer-events:none;max-width:none}
 .czm{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--secondary-text-color,#9b9b9b)}
 .czm input{flex:1;accent-color:#f2b866}
@@ -643,7 +656,7 @@ class ARLightingScenesCard extends HTMLElement {
     const cr = { shape: isIcon ? "sq" : "wide", s: 1, min: 1, x: 0, y: 0, fw: 0, fh: 0 };
     const wrap = document.createElement("div");
     wrap.className = "crop";
-    wrap.innerHTML = `<div class="cbox" role="dialog" aria-modal="true"><h2>${isIcon ? "Crop your icon" : "Crop your background"}</h2><div class="tabs" id="cshp"></div><div class="cfw"><div class="cfr${isIcon ? " round" : ""}" id="cfr"><img alt="" id="cimg"></div></div><div class="czm"><span>Zoom</span><input type="range" id="czm" min="1" max="4" step="0.01" value="1" aria-label="Zoom"></div><input class="t" id="cnm" maxlength="24" placeholder="Name (shows under it on the panel)"><div class="cact"><button class="b" type="button" id="cno">Cancel</button><button class="b p" type="button" id="cok">Save</button></div></div>`;
+    wrap.innerHTML = `<div class="cbox" role="dialog" aria-modal="true"><h2>${isIcon ? "Crop your icon" : "Crop your background"}</h2><div class="tabs" id="cshp"></div><div class="cfw${isIcon ? " ic" : ""}"><div class="cfr${isIcon ? " chk" : ""}" id="cfr"><img alt="" id="cimg"></div>${isIcon ? '<div class="cpv"><div class="pv chk"><canvas id="pv1" width="192" height="192"></canvas></div><div class="pv dk"><canvas id="pv2" width="192" height="192"></canvas></div><small>Saved icon: see-through, and on the panel</small></div>' : ""}</div><div class="czm"><span>Zoom</span><input type="range" id="czm" min="1" max="4" step="0.01" value="1" aria-label="Zoom"></div>${isIcon ? '<div class="copt"><label class="ctg"><input type="checkbox" id="crm" checked> Remove background</label><div class="czm"><span>Strength</span><input type="range" id="ctol" min="15" max="150" step="1" value="60" aria-label="How much of the background to remove"></div><label class="ctg"><input type="checkbox" id="cho"> Inside gaps too <small>(the middle of a ring, letter or loop)</small></label><div class="ccol"><span>Icon colour</span><button class="tab sel" type="button" data-col="0">As it is</button><button class="tab" type="button" data-col="1">White</button></div><p class="note" id="cnote" style="margin:0"></p></div>' : ""}<input class="t" id="cnm" maxlength="24" placeholder="Name (shows under it on the panel)"><div class="cact"><button class="b" type="button" id="cno">Cancel</button><button class="b p" type="button" id="cok">Save</button></div></div>`;
     this.shadowRoot.appendChild(wrap);
     const $ = (id) => wrap.querySelector("#" + id);
     const img = $("cimg");
@@ -667,13 +680,54 @@ class ARLightingScenesCard extends HTMLElement {
     const draw = () => {
       const iw = img.naturalWidth * cr.s;
       const ih = img.naturalHeight * cr.s;
-      cr.x = Math.min(0, Math.max(cr.fw - iw, cr.x));
-      cr.y = Math.min(0, Math.max(cr.fh - ih, cr.y));
+      cr.x = iw <= cr.fw ? (cr.fw - iw) / 2 : Math.min(0, Math.max(cr.fw - iw, cr.x));
+      cr.y = ih <= cr.fh ? (cr.fh - ih) / 2 : Math.min(0, Math.max(cr.fh - ih, cr.y));
       img.style.transform = "translate(" + cr.x + "px," + cr.y + "px) scale(" + cr.s + ")";
+      if (isIcon) later();
+    };
+    // icons: the cut-out, as it will be saved, shown live
+    let ed = null, pvT = 0;
+    const cut = (px, out) => {
+      const c = document.createElement("canvas");
+      c.width = px;
+      c.height = px;
+      const g = c.getContext("2d");
+      g.imageSmoothingQuality = "high";
+      g.drawImage(img, cr.x * (px / cr.fw), cr.y * (px / cr.fh), img.naturalWidth * cr.s * (px / cr.fw), img.naturalHeight * cr.s * (px / cr.fh));
+      return iconCutout(c, { remove: $("crm").checked, tol: +$("ctol").value, holes: $("cho").checked, white: cr.white, size: out, fit: true, info: ed });
+    };
+    const preview = () => {
+      if (!ed) return;
+      const r = cut(288, 192);
+      ["pv1", "pv2"].forEach((id) => {
+        const g = $(id).getContext("2d");
+        g.clearRect(0, 0, 192, 192);
+        g.drawImage(r.canvas, 0, 0);
+      });
+      const nt = $("cnote");
+      nt.textContent = ed.hasAlpha
+        ? "This picture already has a see-through background: it's kept as it is."
+        : !$("crm").checked
+        ? "The background is kept. Tick Remove background to save the icon only."
+        : r.info.empty
+        ? "Nothing left: lower the Strength."
+        : r.info.dark && !cr.white
+        ? "This icon is dark, so it will be hard to see on the panel: choose White."
+        : ed.plain
+        ? "If bits of the icon disappear, lower the Strength. If background is left, raise it."
+        : "The background isn't one plain colour, so it may not all come off. Raise the Strength, or use a picture on a plain background.";
+      $("crm").disabled = ed.hasAlpha;
+      $("ctol").disabled = ed.hasAlpha || !$("crm").checked;
+      $("cho").disabled = ed.hasAlpha || !$("crm").checked;
+    };
+    const later = () => {
+      clearTimeout(pvT);
+      pvT = setTimeout(preview, 60);
     };
     const fit = () => {
       size();
-      cr.min = Math.max(cr.fw / img.naturalWidth, cr.fh / img.naturalHeight);
+      // icons: the whole picture fits at the start (a wide logo isn't cut off)
+      cr.min = (isIcon ? Math.min : Math.max)(cr.fw / img.naturalWidth, cr.fh / img.naturalHeight);
       cr.s = cr.min;
       cr.x = (cr.fw - img.naturalWidth * cr.s) / 2;
       cr.y = (cr.fh - img.naturalHeight * cr.s) / 2;
@@ -692,7 +746,7 @@ class ARLightingScenesCard extends HTMLElement {
     const shapes = () => {
       const box = $("cshp");
       if (isIcon) {
-        box.innerHTML = '<span class="note" style="margin:0">Square, shown round on the panel buttons.</span>';
+        box.innerHTML = '<span class="note" style="margin:0">Square. Only the icon is kept: the background comes off, so it sits on the panel button like the built-in icons.</span>';
         return;
       }
       box.innerHTML = Object.keys(SHAPES).map((k) => `<button class="tab${k === cr.shape ? " sel" : ""}" type="button" data-shp="${k}">${SHAPES[k][2]}</button>`).join("");
@@ -705,6 +759,16 @@ class ARLightingScenesCard extends HTMLElement {
       );
     };
     $("czm").addEventListener("input", (e) => zoomTo(+e.target.value));
+    if (isIcon) {
+      ["crm", "ctol", "cho"].forEach((id) => $(id).addEventListener("input", later));
+      wrap.querySelectorAll("[data-col]").forEach((b) =>
+        b.addEventListener("click", () => {
+          cr.white = b.getAttribute("data-col") === "1";
+          wrap.querySelectorAll("[data-col]").forEach((x) => x.classList.toggle("sel", x === b));
+          later();
+        })
+      );
+    }
     const pts = new Map();
     let pinch = null;
     frame.addEventListener("pointerdown", (e) => {
@@ -755,12 +819,17 @@ class ARLightingScenesCard extends HTMLElement {
       const [a, b] = SHAPES[cr.shape];
       const OW = isIcon ? 256 : a >= b ? 1600 : 1000;
       const OH = Math.round((OW * b) / a);
-      const c = document.createElement("canvas");
-      c.width = OW;
-      c.height = OH;
-      const g = c.getContext("2d");
-      g.imageSmoothingQuality = "high";
-      g.drawImage(img, -cr.x / cr.s, -cr.y / cr.s, cr.fw / cr.s, cr.fh / cr.s, 0, 0, OW, OH);
+      let c;
+      if (isIcon) {
+        c = cut(768, OW).canvas; // cut out at 3× and scaled down: clean edges
+      } else {
+        c = document.createElement("canvas");
+        c.width = OW;
+        c.height = OH;
+        const g = c.getContext("2d");
+        g.imageSmoothingQuality = "high";
+        g.drawImage(img, -cr.x / cr.s, -cr.y / cr.s, cr.fw / cr.s, cr.fh / cr.s, 0, 0, OW, OH);
+      }
       const data = c.toDataURL(isIcon ? "image/png" : "image/jpeg", 0.86);
       const name = $("cnm").value.trim();
       $("cok").disabled = true;
@@ -772,11 +841,150 @@ class ARLightingScenesCard extends HTMLElement {
       });
     });
     img.onload = () => {
+      if (isIcon) {
+        ed = pictureEdge(img);
+        if (ed.hasAlpha) $("crm").checked = false;
+      }
       shapes();
       fit();
     };
     img.src = src;
   }
+}
+
+// ---- icon cut-out: takes the plain background off an uploaded icon -----------
+// The background colour is read from the picture's edge. Only background that is
+// joined to the edge is removed (a white mark inside the icon stays), unless
+// "inside gaps too" is on. Edges get soft alpha and their colour is un-mixed from
+// the background, so no white halo shows on the dark panel. Then the icon is
+// trimmed and centred in the square.
+function pictureEdge(img) {
+  const k = Math.min(1, 400 / Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(img.naturalWidth * k));
+  c.height = Math.max(1, Math.round(img.naturalHeight * k));
+  c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+  const r = iconCutout(c, { remove: false, tol: 60, size: 8, fit: false });
+  return { hasAlpha: r.info.hasAlpha, plain: r.info.plain, bg: r.info.bg };
+}
+function iconCutout(src, opt) {
+  const W = src.width, H = src.height;
+  const g0 = src.getContext("2d", { willReadFrequently: true });
+  const im = g0.getImageData(0, 0, W, H);
+  const d = im.data, n = W * H;
+  // edge pixels: already transparent? plain background?
+  const edge = [];
+  for (let x = 0; x < W; x++) edge.push(x, (H - 1) * W + x);
+  for (let y = 1; y < H - 1; y++) edge.push(y * W, y * W + W - 1);
+  let clear = 0;
+  for (const i of edge) if (d[i * 4 + 3] < 200) clear++;
+  const hasAlpha = opt.info ? opt.info.hasAlpha : clear > edge.length * 0.3;
+  const ch = [[], [], []];
+  for (const i of edge) if (d[i * 4 + 3] >= 200) for (let c = 0; c < 3; c++) ch[c].push(d[i * 4 + c]);
+  const med = (a) => { if (!a.length) return 255; a.sort((x, y) => x - y); return a[a.length >> 1]; };
+  const bg = opt.info ? opt.info.bg : [med(ch[0]), med(ch[1]), med(ch[2])];
+  const dist = (i) => { const r = d[i * 4] - bg[0], gg = d[i * 4 + 1] - bg[1], b = d[i * 4 + 2] - bg[2]; return Math.sqrt(r * r + gg * gg + b * b); };
+  let near = 0, opq = 0;
+  for (const i of edge) if (d[i * 4 + 3] >= 200) { opq++; if (dist(i) < 40) near++; }
+  const plain = opq > 0 && near / opq > 0.6;
+  const info = opt.info ? Object.assign({}, opt.info) : { hasAlpha, plain, bg };
+  const A = new Float32Array(n); // 0..1 alpha from the colour
+  for (let i = 0; i < n; i++) A[i] = d[i * 4 + 3] / 255;
+  if (opt.remove && !hasAlpha) {
+    const hi = opt.tol, lo = opt.tol * 0.45;
+    const D = new Float32Array(n);
+    for (let i = 0; i < n; i++) D[i] = d[i * 4 + 3] < 128 ? 0 : dist(i); // empty room around a zoomed-out picture is background
+    const inBg = new Uint8Array(n);
+    if (opt.holes) {
+      for (let i = 0; i < n; i++) if (D[i] < hi) inBg[i] = 1;
+    } else {
+      const q = new Int32Array(n);
+      let qh = 0, qt = 0;
+      for (const i of edge) if (!inBg[i] && D[i] < hi) { inBg[i] = 1; q[qt++] = i; }
+      while (qh < qt) {
+        const i = q[qh++], x = i % W, y = (i / W) | 0;
+        // spread only through clear background: soft edge pixels are taken but
+        // don't carry on, so a thin outline can't leak into the icon
+        if (D[i] >= lo) continue;
+        const nb = [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, y > 0 ? i - W : -1, y < H - 1 ? i + W : -1];
+        for (const j of nb) if (j >= 0 && !inBg[j] && D[j] < hi) { inBg[j] = 1; q[qt++] = j; }
+      }
+    }
+    // the cut edge: background pixels that aren't clear, and icon pixels up to
+    // 2 px from the background (the blend between icon and background)
+    const near = inBg.slice();
+    for (let k = 0; k < 2; k++) {
+      const nx = near.slice();
+      for (let i = 0; i < n; i++) {
+        if (near[i]) continue;
+        const x = i % W, y = (i / W) | 0;
+        if ((x > 0 && near[i - 1]) || (x < W - 1 && near[i + 1]) || (y > 0 && near[i - W]) || (y < H - 1 && near[i + W])) nx[i] = 1;
+      }
+      near.set(nx);
+    }
+    const floor = lo * 0.5; // JPEG noise in the background
+    for (let i = 0; i < n; i++) {
+      if (inBg[i] && D[i] < lo) { A[i] = 0; continue; }
+      if (!near[i]) continue;
+      // how far this pixel is from the background, against the icon colour next to it
+      const x = i % W, y = (i / W) | 0;
+      let fg = 0;
+      for (let dy = -3; dy <= 3; dy++) {
+        const yy = y + dy; if (yy < 0 || yy >= H) continue;
+        for (let dx = -3; dx <= 3; dx++) {
+          const xx = x + dx; if (xx < 0 || xx >= W) continue;
+          const j = yy * W + xx;
+          if (!inBg[j] && D[j] > fg) fg = D[j];
+        }
+      }
+      if (fg <= hi) fg = Math.max(fg, D[i]); // no solid icon colour close by
+      if (fg <= floor) continue;
+      const a = Math.max(0, Math.min(1, (D[i] - floor) / (fg - floor)));
+      A[i] = Math.min(A[i], a);
+      if (a > 0 && a < 1) {
+        // un-mix the background from the edge colour (no white fringe)
+        for (let c = 0; c < 3; c++) d[i * 4 + c] = Math.max(0, Math.min(255, Math.round((d[i * 4 + c] - (1 - a) * bg[c]) / a)));
+      }
+    }
+    // smooth the cut edge a touch (1-2-1), never adding alpha the colour didn't have
+    const B = new Float32Array(n);
+    for (let y = 0; y < H; y++)
+      for (let x = 0; x < W; x++) {
+        let s = 0, w = 0;
+        for (let dy = -1; dy <= 1; dy++) {
+          const yy = y + dy; if (yy < 0 || yy >= H) continue;
+          for (let dx = -1; dx <= 1; dx++) {
+            const xx = x + dx; if (xx < 0 || xx >= W) continue;
+            const k = (dx ? 1 : 2) * (dy ? 1 : 2); s += A[yy * W + xx] * k; w += k;
+          }
+        }
+        B[y * W + x] = Math.min(A[y * W + x], (A[y * W + x] + s / w) / 2);
+      }
+    for (let i = 0; i < n; i++) A[i] = B[i];
+  }
+  let lum = 0, cnt = 0;
+  for (let i = 0; i < n; i++) {
+    d[i * 4 + 3] = Math.round(A[i] * 255);
+    if (A[i] > 0.9) { lum += 0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2]; cnt++; }
+    if (opt.white && A[i] > 0) { d[i * 4] = 255; d[i * 4 + 1] = 255; d[i * 4 + 2] = 255; }
+  }
+  info.dark = cnt > 0 && lum / cnt < 80; // hard to see on the dark panel
+  const tmp = document.createElement("canvas");
+  tmp.width = W; tmp.height = H;
+  tmp.getContext("2d").putImageData(im, 0, 0);
+  // trim to the icon and centre it with a little room around
+  let x0 = W, y0 = H, x1 = -1, y1 = -1;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (d[(y * W + x) * 4 + 3] > 10) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  const out = document.createElement("canvas");
+  out.width = opt.size; out.height = opt.size;
+  const g = out.getContext("2d");
+  g.imageSmoothingQuality = "high";
+  if (x1 < 0) { info.empty = true; return { canvas: out, info }; }
+  const bw = x1 - x0 + 1, bh = y1 - y0 + 1, room = opt.size * (opt.fit ? 0.84 : 1);
+  const sc = opt.fit ? room / Math.max(bw, bh) : opt.size / W;
+  if (opt.fit) g.drawImage(tmp, x0, y0, bw, bh, (opt.size - bw * sc) / 2, (opt.size - bh * sc) / 2, bw * sc, bh * sc);
+  else g.drawImage(tmp, 0, 0, W, H, 0, 0, opt.size, opt.size);
+  return { canvas: out, info };
 }
 
 
